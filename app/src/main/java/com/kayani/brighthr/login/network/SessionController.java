@@ -1,16 +1,11 @@
 package com.kayani.brighthr.login.network;
 
-import android.content.Context;
-
 import com.kayani.brighthr.login.entity.UserDataEntity;
 import com.kayani.brighthr.login.entity.UserEntity;
 
 public class SessionController {
-    private Context mContext;
-    private NetworkService mNetworkService;
 
     public SessionController() {
-//        mContext = context;
     }
 
     private synchronized NetworkService getNetworkService() {

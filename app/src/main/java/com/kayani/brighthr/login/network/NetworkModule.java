@@ -8,7 +8,6 @@ import com.google.gson.GsonBuilder;
 import com.kayani.brighthr.login.BuildConfig;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -43,25 +42,22 @@ public class NetworkModule {
         try {
             cache = new Cache(cacheFile, 10 * 1024 * 1024);
         } catch (Exception e) {
-//            e.printStackTrace();
+            e.printStackTrace();
         }
 
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public okhttp3.Response intercept(Chain chain) throws IOException {
-                        Request original = chain.request();
+                .addInterceptor(chain -> {
+                    Request original = chain.request();
 
-                        // Customize the request
-                        Request request = original.newBuilder()
-                                .header("Content-Type", "application/json")
-                                .build();
+                    // Customize the request
+                    Request request = original.newBuilder()
+                            .header("Content-Type", "application/json")
+                            .build();
 
-                        okhttp3.Response response = chain.proceed(request);
-                        response.cacheResponse();
-                        // Customize or return the response
-                        return response;
-                    }
+                    okhttp3.Response response = chain.proceed(request);
+                    response.cacheResponse();
+                    // Customize or return the response
+                    return response;
                 })
                 .cache(cache)
 
@@ -72,7 +68,6 @@ public class NetworkModule {
                 .baseUrl(BuildConfig.BASEURL)
                 .client(okHttpClient)
                 .addConverterFactory(GsonConverterFactory.create())
-//                .addConverterFactory(ScalarsConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .client(okHttpClient)
                 .build();
@@ -88,6 +83,21 @@ public class NetworkModule {
         return retrofit.create(NetworkService.class);
     }
 
+    @Provides
+    @Singleton
+    @SuppressWarnings("unused")
+    public NetworkService providesNetworkService(
+            Retrofit retrofit) {
+        return retrofit.create(NetworkService.class);
+    }
+
+    @Provides
+    @Singleton
+    @SuppressWarnings("unused")
+    public Service providesService(
+            NetworkService networkService) {
+        return new Service(networkService);
+    }
 
     private static class Builder {
         private final ArrayList<Interceptor> mLowerInterceptors = new ArrayList<>();
@@ -128,21 +138,6 @@ public class NetworkModule {
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .build();
         }
-    }
-
-    @Provides
-    @Singleton
-    @SuppressWarnings("unused")
-    public NetworkService providesNetworkService(
-            Retrofit retrofit) {
-        return retrofit.create(NetworkService.class);
-    }
-    @Provides
-    @Singleton
-    @SuppressWarnings("unused")
-    public Service providesService(
-            NetworkService networkService) {
-        return new Service(networkService);
     }
 
 }
