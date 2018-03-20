@@ -1,5 +1,8 @@
 package com.kayani.brighthr.login.model;
 
+import com.kayani.brighthr.login.entity.UserEntity;
+import com.kayani.brighthr.login.network.ResultListener;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,20 +11,26 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import rx.schedulers.Schedulers;
 
-import static org.mockito.Mockito.verify;
-
 @RunWith(MockitoJUnitRunner.class)
 public class LoginUseCaseShould {
-    private String userOneEmail = "foo@example.com";
-    private String userOnePassword = "hello";
+    private String userOneEmail = "c_emp1@grr.la";
+    private String userOnePassword = "123456";
     private LoginUseCase loginUseCase;
+    private UserDataRepository userDataRepository;
+    private UserEntity userEntity;
 
-    @Mock private LoginResultsListener resultsListener;
+    @Mock
+    private ResultListener resultsListener;
+
+    @Mock
+    private LoginUseCase.CallBack mResultsListener;
 
 
     @Before
     public void setUp() {
         loginUseCase = new LoginUseCase(Schedulers.immediate(), Schedulers.immediate());
+//        userEntity.setUsername(userOneEmail);
+//        userEntity.setPassword(userOnePassword);
     }
 
     @Test

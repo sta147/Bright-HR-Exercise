@@ -1,14 +1,16 @@
 <resources>
-    <string name="app_name">CleanLogin</string>
+    <string name="app_name">Bright HR Exercise</string>
 
-    <string name="prompt_email">Email</string>
+    <string name="prompt_email">Email Address</string>
     <string name="prompt_password">Password</string>
-    <string name="action_sign_in_short">Login in</string>
-    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="action_sign_in_short">Login</string>
+    <string name="error_invalid_email">This username address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">Email or password is incorrect</string>
-    <string name="error_network">System unavailable. Please try again</string>
+    <string name="error_network">Sorry, something has gone wrong. Please try again.</string>
+    <string name="error_forbidden">Please enter a valid username and password.</string>
     <string name="error_field_required">This field is required</string>
     <string name="logout">Log Out</string>
     <string name="landing_page">Landing Page</string>
+    <string name="welcome_message">Welcome to %s.</string>
 </resources>

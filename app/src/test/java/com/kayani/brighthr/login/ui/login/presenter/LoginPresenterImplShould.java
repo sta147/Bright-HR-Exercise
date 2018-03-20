@@ -1,7 +1,7 @@
 package com.kayani.brighthr.login.ui.login.presenter;
 
-import com.kayani.brighthr.login.ui.login.view.LoginView;
 import com.kayani.brighthr.login.model.LoginUseCase;
+import com.kayani.brighthr.login.ui.login.view.LoginView;
 import com.kayani.brighthr.login.util.Logger;
 
 import org.junit.Before;
@@ -16,9 +16,12 @@ import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LoginPresenterImplShould {
-    @Mock private LoginView loginView;
-    @Mock private LoginUseCase loginUseCase;
-    @Mock private Logger logger;
+    @Mock
+    private LoginView loginView;
+    @Mock
+    private LoginUseCase loginUseCase;
+    @Mock
+    private Logger logger;
     private LoginPresenterImpl loginPresenter;
     private String VALID_EMAIL = "test@gmail.com";
     private String VALID_PASSWORD = "abcde";
@@ -58,7 +61,7 @@ public class LoginPresenterImplShould {
         loginPresenter.mLoginStarted = true;
         loginPresenter.mLoginResult = LoginPresenterImpl.Result.SUCCESS;
         loginPresenter.attachView(loginView);
-        verify(loginView).navigateToLandingPage();
+        verify(loginView).navigateToLandingPage(null);
     }
 
     @Test
@@ -121,13 +124,13 @@ public class LoginPresenterImplShould {
     @Test
     public void testBypassLoginNavigatesToLandingPage() {
         loginPresenter.bypassLogin();
-        verify(loginView).navigateToLandingPage();
+        verify(loginView).navigateToLandingPage(null);
     }
 
     @Test
     public void testOnLoginSuccessNavigatesToLandingPageOnSuccess() {
         loginPresenter.onLoginSuccess();
-        verify(loginView).navigateToLandingPage();
+        verify(loginView).navigateToLandingPage(null);
     }
 
     @Test

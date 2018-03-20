@@ -1,5 +1,7 @@
 package com.kayani.brighthr.login.ui.login.view;
 
+import com.kayani.brighthr.login.entity.UserDataEntity;
+
 /**
  * View for the login screen. Informs the user of any errors, progress, and navigates to the
  * landing page upon success.
@@ -19,7 +21,7 @@ public interface LoginView {
 
     void showEmailInvalidError();
 
-    void showNetworkError();
+    void showNetworkError(int errorCode);
 
     void showValidationError();
 
@@ -27,5 +29,5 @@ public interface LoginView {
 
     void hideProgress();
 
-    void navigateToLandingPage();
+    void navigateToLandingPage(UserDataEntity data);
 }

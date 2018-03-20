@@ -1,44 +1,51 @@
 package com.kayani.brighthr.login.ui.login.presenter;
 
-import com.kayani.brighthr.login.ui.login.view.LoginView;
-import com.kayani.brighthr.login.model.LoginResultsListener;
-import com.kayani.brighthr.login.model.LoginUseCase;
-import com.kayani.brighthr.login.util.Logger;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.kayani.brighthr.login.entity.UserDataEntity;
+import com.kayani.brighthr.login.entity.UserEntity;
+import com.kayani.brighthr.login.model.LoginResultsListener;
+import com.kayani.brighthr.login.model.UserDataRepository;
+import com.kayani.brighthr.login.network.NetworkListener;
+import com.kayani.brighthr.login.network.ResultListener;
+import com.kayani.brighthr.login.network.SessionController;
+import com.kayani.brighthr.login.ui.login.view.LoginView;
+import com.kayani.brighthr.login.util.Logger;
+
+import java.net.HttpURLConnection;
 
 import javax.inject.Inject;
 
 /**
  * Basic {@link LoginPresenter} and {@link LoginResultsListener}, updates the {@link LoginView}
  * with login results.
- *
  */
 public class LoginPresenterImpl implements LoginPresenter, LoginResultsListener {
     private static final String LOG_TAG = "LoginPresenterImpl";
 
-    @VisibleForTesting LoginView loginView;
-    private LoginUseCase mLoginUseCase;
-
+    @VisibleForTesting
+    LoginView loginView;
+    @VisibleForTesting
+    boolean mLoginStarted;
+    @VisibleForTesting
+    Result mLoginResult;
+    private UserDataRepository mUsersRepository;
     private String mEmail;
     private String mPassword;
-    @VisibleForTesting boolean mLoginStarted;
-    @VisibleForTesting Result mLoginResult;
     private Logger mLogger;
 
     /**
      * Create a new Login Presenter
      *
-     * @param loginUseCase Use case to delegate core logic work to.
+     * @param usersRepository
      */
     @Inject
-    public LoginPresenterImpl(LoginUseCase loginUseCase, Logger logger) {
-        this.mLoginUseCase = loginUseCase;
+    public LoginPresenterImpl(UserDataRepository usersRepository, Logger logger) {
+        this.mUsersRepository = usersRepository;
         this.mLogger = logger;
     }
 
     /**
-     *
      * @param loginView View to update based on login results.
      */
     public void attachView(LoginView loginView) {
@@ -62,10 +69,10 @@ public class LoginPresenterImpl implements LoginPresenter, LoginResultsListener 
         mLogger.log(LOG_TAG, "login started, " + mLoginResult + " was present.");
         switch (mLoginResult) {
             case SUCCESS:
-                onLoginSuccess();
+                onLoginSuccess(null);
                 break;
             case NETWORK_ERROR:
-                onNetworkError();
+                onNetworkError(HttpURLConnection.HTTP_FORBIDDEN);
                 break;
             case VALIDATION_ERROR:
                 onValidationError();
@@ -95,14 +102,31 @@ public class LoginPresenterImpl implements LoginPresenter, LoginResultsListener 
             loginView.showPasswordInvalidError();
         } else {
             mLoginStarted = true;
-            mLoginUseCase.doLogin(email, password, this);
+            final UserEntity userEntity = new UserEntity();
+            userEntity.setUsername(email);
+            userEntity.setPassword(password);
+
+            final SessionController sessionController = new SessionController();
+            sessionController
+                    .doLogin(userEntity, new NetworkListener<>(new ResultListener<UserDataEntity>() {
+                        @Override
+                        public void onResult(UserDataEntity data, int resultCode) {
+                            if (resultCode == HttpURLConnection.HTTP_OK) {
+                                mLogger.log(LOG_TAG, "Logged in ");
+                                onLoginSuccess(data);
+                            } else {
+                                onNetworkError(resultCode);
+                            }
+                            loginView.hideProgress();
+                        }
+                    }));
             loginView.showProgress();
         }
     }
 
     @Override
     public void bypassLogin() {
-        loginView.navigateToLandingPage();
+        loginView.navigateToLandingPage(null);
     }
 
     private boolean isEmailValid(String email) {
@@ -113,23 +137,23 @@ public class LoginPresenterImpl implements LoginPresenter, LoginResultsListener 
         return password.length() > 4;
     }
 
-    /*** LoginResultsListener ***/
+    //region LoginResultsListener
     @Override
-    public void onLoginSuccess() {
+    public void onLoginSuccess(UserDataEntity data) {
         mLogger.log(LOG_TAG, "login success, view: " + loginView);
         mLoginResult = Result.SUCCESS;
         if (loginView != null) {
-            loginView.navigateToLandingPage();
+            loginView.navigateToLandingPage(data);
         }
     }
 
     @Override
-    public void onNetworkError() {
+    public void onNetworkError(int errorCode) {
         mLogger.log(LOG_TAG, "network error, view: " + loginView);
         mLoginResult = Result.NETWORK_ERROR;
         if (loginView != null) {
             loginView.hideProgress();
-            loginView.showNetworkError();
+            loginView.showNetworkError(errorCode);
         }
     }
 
@@ -153,4 +177,5 @@ public class LoginPresenterImpl implements LoginPresenter, LoginResultsListener 
         NETWORK_ERROR,
         VALIDATION_ERROR
     }
+    //endregion
 }
